@@ -1,0 +1,33 @@
+name: Commit Stage
+
+on:
+  push:
+  schedule: # Every Monday
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
+      packages: write
+    uses: ./.github/workflows/multi-arch-publish.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [
+          {context: ollama/bakllava, image: ollama-bakllava},
+          {context: ollama/llama3, image: ollama-llama3},
+          {context: ollama/llava, image: ollama-llava},
+          {context: ollama/mistral, image: ollama-mistral},
+          {context: ollama/orca-mini, image: ollama-orca-mini},
+          {context: ollama/phi3, image: ollama-phi3}
+        ]
+    with:
+      context: ${{ matrix.project.context }}
+      image: ${{ matrix.project.image }}
+    secrets:  
+      push-token: ${{ secrets.IMAGE_PUSH_TOKEN }}
